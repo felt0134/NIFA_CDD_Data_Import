@@ -165,7 +165,7 @@ region_name = 'northern_mixed_prairies'
 #set year
 
 #2003-2020
-year_value = '2016'
+year_value = '2020'
 
 years <- seq(2014,2020,1)
 for(j in years){
