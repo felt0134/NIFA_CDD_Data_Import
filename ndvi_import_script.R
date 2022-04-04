@@ -1,6 +1,8 @@
 #GPP import
+#set parallel processing
 plan(multisession, workers = 10)
-
+options(future.globals.maxSize = 8000 * 1024^2) #https://github.com/satijalab/seurat/issues/1845
+#?plan
 #import and subset
 rangeland_npp_covariates <- readRDS('./../../Data/Herbaceous_NPP_1986_2015_V2.rds')
 head(rangeland_npp_covariates)
@@ -75,22 +77,22 @@ with_progress({
 test_function_2 <- do.call('rbind',test_function_2)
 
 test_function_3 <- rbind(test_function,test_function_2)
+rm(test_function,test_function_2)
 #head(test_function_3)
+#summary(test_function_3)
 
 period_list <- c(1:15)
 for(i in period_list){
   
   #test_function$year <- as.numeric(year_value)
-  test_function_4 <-subset(test_function_3,period==i)
+  test_function_4 <- subset(test_function_3,period==i)
   test_function_4 <- test_function_4 %>%
     dplyr::filter(ndvi_mean < 1000) %>% #remove high values
     dplyr::filter(ndvi_mean > -2000)
   
-  #fix lat/lon
-  #year_id_df <- test_function_4[c(2,1,3)] 
+  #get into an XYZ
   year_id_df <- test_function_4[c(1,2,3)] 
-  colnames(year_id_df) <- c('x','y','gpp')
-  
+  colnames(year_id_df) <- c('x','y','ndvi')
   year_id_raster <- rasterFromXYZ(year_id_df)
   crs(year_id_raster) <- aea.proj
   filename <- paste0('./../../Data/NDVI/Ecoregion/',Ecoregion,'/MODIS_NDVI/Period/',i,'/NDVI_',year_value,'_',i,'.tif')

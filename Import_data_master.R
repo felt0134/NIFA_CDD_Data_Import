@@ -1,7 +1,4 @@
 
-#library(parallel)
-library(future.apply)
-library(progressr)
 #https://cran.r-project.org/web/packages/progressr/vignettes/progressr-intro.html
 
 #daymet climate data information
@@ -87,6 +84,16 @@ look.2 <- raster("./../../Data/GPP/Ecoregion/northern_mixed_prairies/MODIS_GPP/P
 plot(look.2)
 
 #-------------------------------------------------------------------------------
+# import MODIS NDVI data ------
+
+#load library for API:
+library(MODISTools)
+region_name <- 'shortgrass_steppe'
+#products <- mt_products()
+year_value <- '2010'
+source('ndvi_import_script.R')
+
+#-------------------------------------------------------------------------------
 #import daymet temp data -----
 library(daymetr)
 
@@ -165,7 +172,7 @@ region_name = 'northern_mixed_prairies'
 #set year
 
 #2003-2020
-year_value = '2020'
+year_value = '2012'
 
 years <- seq(2014,2020,1)
 for(j in years){

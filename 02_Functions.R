@@ -758,7 +758,7 @@ get_modis_ndvi <- function(i) {
     progress = TRUE
   )
   
-  #filter out bad values, get day of year, take median value for coordinate, and rescale GPP units to g/m^2
+  #filter out bad values, get day of year, take median value for coordinate, and rescale 
   site_ndvi_2  <- site_ndvi  %>%
     #filter(value <= X) %>% if there is a threshold value to filter by
     group_by(calendar_date) %>%
@@ -767,7 +767,7 @@ get_modis_ndvi <- function(i) {
     filter(doy > 60) %>%
     filter(doy < 300)
   
-  #plot(site_ndvi_mean~doy, data=site_ndvi_2)
+  #plot(ndvi_mean~doy, data=site_ndvi_2)
   
   #get year column
   site_ndvi_2$year <- substr(site_ndvi_2$calendar_date, 1, 4)
@@ -780,8 +780,8 @@ get_modis_ndvi <- function(i) {
   
   site_ndvi_2$period <- as.numeric(rownames(site_ndvi_2))
   
-  site_ndvi_2$x <- temp_lat
-  site_ndvi_2$y <- temp_lon
+  site_ndvi_2$y <- temp_lat
+  site_ndvi_2$x <- temp_lon
   
   site_ndvi_2 <- site_ndvi_2 %>%
     select(x,y, ndvi_mean,period)
