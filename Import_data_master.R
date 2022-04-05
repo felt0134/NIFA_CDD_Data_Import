@@ -15,7 +15,7 @@ library(daymetr)
 #northern_mixed_prairies
 #shortgrass_steppe
 region_name = 'nebraska_sandhills' 
-sandhills=T
+sandhills=F
 
 #set year
 
@@ -90,7 +90,7 @@ plot(look.2)
 library(MODISTools)
 region_name <- 'shortgrass_steppe'
 #products <- mt_products()
-year_value <- '2010'
+year_value <- '2012'
 source('ndvi_import_script.R')
 
 #-------------------------------------------------------------------------------
@@ -188,6 +188,20 @@ source('seasonal_climate_import.R')
 
 
 
+
+
+
+
+#-------------------------------------------------------------------------------
+#import 1 km subset of modis GPP and daymet ppt ------
+
+library(MODISTools)
+library(daymetr)
+sandhills=F
+region_name <- 'shortgrass_steppe'
+#year_value <- '2012'
+
+source('ppt_gpp_1km_subset_import.R')
 
 
 
