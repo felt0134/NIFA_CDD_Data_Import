@@ -90,7 +90,7 @@ plot(look.2)
 library(MODISTools)
 region_name <- 'shortgrass_steppe'
 #products <- mt_products()
-year_value <- '2012'
+year_value <- '2013'
 source('ndvi_import_script.R')
 
 #-------------------------------------------------------------------------------
@@ -199,7 +199,7 @@ library(MODISTools)
 library(daymetr)
 sandhills=F
 region_name <- 'shortgrass_steppe'
-#year_value <- '2012'
+region_name <- 'northern_mixed_prairies'
 
 source('ppt_gpp_1km_subset_import.R')
 
