@@ -10,7 +10,7 @@ mean_production<-aggregate(npp~ x + y + region,mean,data=rangeland_npp_covariate
 sgs<-subset(mean_production,region==c(region_name))
 #head(sgs)
 sgs_raster <- rasterFromXYZ(sgs[c(1,2,4)])
-plot(sgs_raster)
+#plot(sgs_raster)
 
 #increase pixel resolution
 #check math

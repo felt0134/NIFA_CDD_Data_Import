@@ -89,8 +89,9 @@ plot(look.2)
 #load library for API:
 library(MODISTools)
 region_name <- 'shortgrass_steppe'
+#region_name <- 'northern_mixed_prairies'
 #products <- mt_products()
-year_value <- '2013'
+year_value <- '2020'
 source('ndvi_import_script.R')
 
 #-------------------------------------------------------------------------------

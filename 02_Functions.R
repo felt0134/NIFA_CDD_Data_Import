@@ -44,7 +44,7 @@ get_16_day_averages_temp <- function(x) {
 #-------------------------------------------------------------------------------
 # import daymet precipitation data -----
 
-#use this one for full import
+#use this one for full import og growing seaon precipitation
 get_daymet <- function(i) {
   temp_lat <- sgs.1000[i,] %>% pull(y)
   temp_lon <- sgs.1000[i,] %>% pull(x)
@@ -94,12 +94,62 @@ get_daymet <- function(i) {
   
 }
 
+#use to get annual precip for a subset of the data
+get_daymet_annual <- function(i) {
+  temp_lat <- sgs.1000[i,] %>% pull(y)
+  temp_lon <- sgs.1000[i,] %>% pull(x)
+  
+  
+  test <- download_daymet(
+    lat = temp_lat,
+    lon = temp_lon,
+    start = year_value,
+    end = year_value
+  ) %>%
+    #--- just get the data part ---#
+    .$data #%>%
+  # #--- convert to tibble (not strictly necessary) ---#
+  # as_tibble() %>%
+  # #--- assign site_id so you know which record is for which site_id ---#
+  # mutate(site_id = temp_site) %>%
+  # #--- get date from day of the year ---#
+  # mutate(date = as.Date(paste(year, yday, sep = "-"), "%Y-%j"))
+  
+  test <- test %>%
+    dplyr::filter(yday > 0) %>%
+    dplyr::filter(yday < 366)
+  
+  
+  # summary(test)
+  # head(test)
+  
+  #subset to precip
+  test <- test[c(1, 2, 4)]
+  
+  #get 16-day sums of precip for each year for the given pixel
+  #year_test <- unique(test$year)
+  
+  summed_precip <- get_16_day_sums(test)
+  
+  #add period ID
+  summed_precip$period <- rownames(summed_precip)
+  summed_precip$period <- as.numeric(summed_precip$period) + 1
+  
+  #add in year and coordinate columns
+  summed_precip$year <- year_value
+  summed_precip$x <- temp_lon
+  summed_precip$y <- temp_lat
+  
+  return(summed_precip)
+  
+}
+
 
 
 #-------------------------------------------------------------------------------
 # import MODIS GPP data ------
 
-#use this one for full import
+#use this one for full import of growing season gpp
 get_modis_gpp_period_3 <- function(i) {
   temp_lat <- sgs.1000[i,] %>% pull(y)
   temp_lon <- sgs.1000[i,] %>% pull(x)
@@ -152,6 +202,69 @@ get_modis_gpp_period_3 <- function(i) {
   
   
   return(site_gpp_3)
+  
+}
+
+#use this one for full annual gpp (for subset analysis)
+get_modis_gpp_period_annual <- function(i) {
+  
+  i=100
+  #get dates
+  start_date = paste0(year_value,"-01-01")
+  end_date = paste0(year_value,"-12-20")
+  
+  temp_lat <- sgs.1000[i,] %>% pull(y)
+  temp_lon <- sgs.1000[i,] %>% pull(x)
+  
+  #get GPP data
+  site_gpp <- mt_subset(
+    product = "MYD17A2H",
+    lat = temp_lat,
+    lon =  temp_lon,
+    band = 'Gpp_500m',
+    start = start_date,
+    end = end_date,
+    km_lr = 5,
+    km_ab = 5,
+    site_name = Ecoregion,
+    internal = TRUE,
+    progress = TRUE
+  )
+  
+  #filter out bad values, get day of year, take median value for coordinate, and rescale GPP units to g/m^2
+  site_gpp_2  <- site_gpp  %>%
+    #filter(value <= X) %>% if there is a threshold value to filter by
+    group_by(calendar_date) %>%
+    summarize(doy = as.numeric(format(as.Date(calendar_date)[1], "%j")),
+              gpp_mean = median(value * as.double(scale))) %>%
+    filter(doy > 0) %>%
+    filter(doy < 365)
+  
+  #get gpp in grams
+  site_gpp_2$gpp_mean <- site_gpp_2$gpp_mean * 1000
+  
+  #get year column
+  site_gpp_2$year <- substr(site_gpp_2$calendar_date, 1, 4)
+  
+  #filter out years with incomplete data
+  # site_length = aggregate(doy ~ year, length, data = site_gpp_2)
+  # colnames(site_length) = c('year', 'length')
+  # site_gpp_2 = merge(site_gpp_2, site_length, by = 'year')
+  # site_gpp_2 = site_gpp_2 %>%
+  #   dplyr::filter(length > 29)
+  
+  # site_gpp_3 <- get_16_day_sums_gpp(site_gpp_2)
+  # site_gpp_3$period <- as.numeric(rownames(site_gpp_3))
+  # site_gpp_3$period = (site_gpp_3$period + 1)
+  
+  site_gpp_2$x <- temp_lat
+  site_gpp_2$y <- temp_lon
+  site_gpp_2 <- site_gpp_2 %>%
+    select(x,y,year,doy,calendar_date,gpp_mean)
+  
+  
+  
+  return(site_gpp_2)
   
 }
 
