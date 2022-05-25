@@ -149,6 +149,7 @@ rm(gs_precip_list,annual_precip_list)
 
 #now do the GPP subset
 test_function_gpp_list <- list()
+
 for(year_value in year_value_list){
 
   with_progress({

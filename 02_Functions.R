@@ -208,7 +208,7 @@ get_modis_gpp_period_3 <- function(i) {
 #use this one for full annual gpp (for subset analysis)
 get_modis_gpp_period_annual <- function(i) {
   
-  i=100
+  #i=100
   #get dates
   start_date = paste0(year_value,"-01-01")
   end_date = paste0(year_value,"-12-20")

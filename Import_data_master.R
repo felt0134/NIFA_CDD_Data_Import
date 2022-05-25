@@ -204,5 +204,14 @@ region_name <- 'northern_mixed_prairies'
 
 source('ppt_gpp_1km_subset_import.R')
 
+#-------------------------------------------------------------------------------
+#import annual and growing season precip subset ------
 
+library(MODISTools)
+library(daymetr)
+sandhills=F
+region_name <- 'shortgrass_steppe'
+#region_name <- 'northern_mixed_prairies'
+
+source('precip_gpp_subset.R')
 

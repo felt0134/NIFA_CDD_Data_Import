@@ -309,3 +309,91 @@ rm(gpp_df_mean,gpp_predicted_average,gpp_predicted_drought,gpp_predicted_drought
 # plot(perc_change ~ doy,data=normal_drought_df,xlab='Julian day',ylab='Drought impact (% change in GPP)')
 # abline(h=0)
 
+
+# gpp subset ------
+
+
+test_function_gpp_list <- list()
+
+year_value_list = 2003
+
+for(year_value in year_value_list){
+  
+  with_progress({
+    p <- progressor(along = 1:nrow(sgs.1000))
+    test_function_gpp <- future_lapply(1:nrow(sgs.1000), function(i) {
+      Sys.sleep(0.1)
+      p(sprintf("i=%g", i))
+      get_modis_gpp_period_annual(i)
+    })
+  })
+  
+  test_function_gpp_list[[year_value]] <-  do.call('rbind',test_function_gpp)
+  
+}
+
+test_function_gpp_df <- data.frame(do.call('rbind',test_function_gpp_list))
+head(test_function_gpp_df)
+
+
+
+
+i=100
+#get dates
+start_date = paste0(year_value,"-01-01")
+end_date = paste0(year_value,"-12-20")
+
+temp_lat <- sgs.1000[i,] %>% pull(y)
+temp_lon <- sgs.1000[i,] %>% pull(x)
+
+#get GPP data
+site_gpp <- mt_subset(
+  product = "MYD17A2H",
+  lat = temp_lat,
+  lon =  temp_lon,
+  band = 'Gpp_500m',
+  start = start_date,
+  end = end_date,
+  km_lr = 5,
+  km_ab = 5,
+  site_name = Ecoregion,
+  internal = TRUE,
+  progress = TRUE
+)
+
+#filter out bad values, get day of year, take median value for coordinate, and rescale GPP units to g/m^2
+site_gpp_2  <- site_gpp  %>%
+  #filter(value <= X) %>% if there is a threshold value to filter by
+  group_by(calendar_date) %>%
+  summarize(doy = as.numeric(format(as.Date(calendar_date)[1], "%j")),
+            gpp_mean = median(value * as.double(scale))) %>%
+  filter(doy > 0) %>%
+  filter(doy < 365)
+
+#get gpp in grams
+site_gpp_2$gpp_mean <- site_gpp_2$gpp_mean * 1000
+
+#get year column
+site_gpp_2$year <- substr(site_gpp_2$calendar_date, 1, 4)
+
+#filter out years with incomplete data
+# site_length = aggregate(doy ~ year, length, data = site_gpp_2)
+# colnames(site_length) = c('year', 'length')
+# site_gpp_2 = merge(site_gpp_2, site_length, by = 'year')
+# site_gpp_2 = site_gpp_2 %>%
+#   dplyr::filter(length > 29)
+
+# site_gpp_3 <- get_16_day_sums_gpp(site_gpp_2)
+# site_gpp_3$period <- as.numeric(rownames(site_gpp_3))
+# site_gpp_3$period = (site_gpp_3$period + 1)
+
+site_gpp_2$x <- temp_lat
+site_gpp_2$y <- temp_lon
+site_gpp_2 <- site_gpp_2 %>%
+  select(x,y,year,doy,calendar_date,gpp_mean)
+
+
+
+return(site_gpp_2)
+
+}
