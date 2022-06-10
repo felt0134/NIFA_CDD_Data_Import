@@ -215,3 +215,8 @@ region_name <- 'northern_mixed_prairies'
 
 source('precip_gpp_subset.R')
 
+
+#-------------------------------------------------------------------------------
+
+source('create_gpp_precip_dataset.R')
+
