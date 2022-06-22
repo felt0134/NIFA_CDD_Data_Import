@@ -1867,6 +1867,29 @@ get_daymet_1km <- function(i) {
   
 }
 
+#-------------------------------------------------------------------------------
 
+#function to help with converting NDVI raster into a dataframe ------
+
+format_ndvi_df <- function(x) {
+  #convert to raster
+  raster_file <- raster(x)
+  
+  #extract year from the name of the raster to later add to dataframe
+  year_val <- substr(names(raster_file), 6, 9)
+  
+  #convert to dataframe and add year and period columns
+  df <- data.frame(rasterToPoints(raster_file))
+  #plot(raster_file)
+  df$year <- year_val
+  df$period <-
+    gsub(paste0("NDVI_", year_val, '_'), '', names(raster_file))
+  colnames(df) <- c('x', 'y', 'ndvi', 'year', 'period')
+  
+  #return formatted dataframe
+  return(df)
+  
+  
+}
 
 
