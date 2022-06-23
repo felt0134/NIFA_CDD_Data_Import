@@ -225,3 +225,11 @@ source('create_gpp_precip_dataset.R')
 #create a combined NDVI-precip dataset for analysis ----
 
 source('create_NDVI_precip_dataset.R')
+
+#-------------------------------------------------------------------------------
+#create a combined gpp-precip 1 km dataset for analysis ----
+
+source('create_gpp_precip_dataset_1km_subset.R')
+
+
+#-------------------------------------------------------------------------------

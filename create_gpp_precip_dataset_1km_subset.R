@@ -1,5 +1,5 @@
 
-#create a combined NDVI and precipitation dataset for each ecoregion for analysis
+# setup
 
 period_list <- seq(1, 15, 1) #set periods
 period_list <-
@@ -13,52 +13,52 @@ year_list <-
 ecoregion_list <- c('shortgrass_steppe','northern_mixed_prairies')
 
 for(Ecoregion in ecoregion_list){
-  
-  print(Ecoregion)
-  
+
+#loop through each year and period combination
+
 #list to store outputs in
-ndvi_list <- list()  
+gpp_list <- list()
 
 #run the loop
 for (i in period_list) {
   filepath <-
     dir(
       paste0(
-        './../../Data/ndvi/Ecoregion/',
+        './../../Data/GPP/Ecoregion/',
         Ecoregion,
-        '/MODIS_ndvi/Period/',
+        '/MODIS_GPP_1km/Period/',
         i,
         '/'
       ),
       full.names = T
     )
-  test <- lapply(filepath, format_ndvi_df)
+  test <- lapply(filepath, format_gpp_df)
   test <- data.frame(do.call('rbind', test))
   #test <- lapply(test,rasterToPoints)
-  ndvi_list[[i]] <- test
+  gpp_list[[i]] <- test
   
 }
 
 #convert list of dataframes to a single dataframe
-ndvi_df <- do.call('rbind', ndvi_list)
-rm(ndvi_list, test) #get rid of excess stuff
+gpp_df <- do.call('rbind', gpp_list)
+rm(gpp_list, test) #get rid of excess stuff
 
 #make unique id for each site
-ndvi_df_mean <- aggregate(ndvi ~ x + y, mean, data = ndvi_df)
-ndvi_df_mean$id_value <- seq.int(nrow(ndvi_df_mean))
-#head(ndvi_df_mean,50)
+gpp_df_mean <- aggregate(gpp ~ x + y, mean, data = gpp_df)
+gpp_df_mean$id_value <- seq.int(nrow(gpp_df_mean))
+#head(gpp_df_mean)
 
 #import conversion of period to day of year to map period on to DOY
-doy_conversion <- read.csv('./../../Data/ndvi/period_day_match.csv')
+doy_conversion <- read.csv('./../../Data/GPP/period_day_match.csv')
 
 #add on day of year and ID columns
-ndvi_df <- merge(ndvi_df, doy_conversion[c(2, 3)], by = c('period'))
-ndvi_df <- merge(ndvi_df, ndvi_df_mean[c(1, 2, 4)], by = c('x', 'y'))
+gpp_df <- merge(gpp_df, doy_conversion[c(2, 3)], by = c('period'))
+gpp_df <- merge(gpp_df, gpp_df_mean[c(1, 2, 4)], by = c('x', 'y'))
 
 #create a vector of unique sites IDs
-id_list <- unique(ndvi_df$id_value)
+id_list <- unique(gpp_df$id_value)
 
-# import ppt -----
+
 ppt_list <- list()
 
 #loop through each year and period
@@ -68,7 +68,7 @@ for (i in period_list) {
       paste0(
         './../../Data/Climate/Ecoregion/',
         Ecoregion,
-        '/Precipitation/Period/',
+        '/Precipitation_1km/Period/',
         i,
         '/'
       ),
@@ -86,19 +86,13 @@ rm(ppt_list, test_ppt) #remove excess data
 #head(ppt_df)
 
 #merge the two dataframes by location, year, and period within each year
-ppt_ndvi <- merge(ndvi_df, ppt_df, by = c('x', 'y', 'year', 'period'))
-#head(ppt_ndvi)
+ppt_gpp <- merge(gpp_df, ppt_df, by = c('x', 'y', 'year', 'period'))
+#head(ppt_gpp)
 rm(ppt_df)
 
-
 #save this file so can just pull it out when re-running this code
-filename <- paste0('./../../Data/NDVI/Ecoregion/',Ecoregion,'/ppt_ndvi_combined.csv')
-write.csv(ppt_ndvi,filename)
-
-
+filename <- paste0('./../../Data/GPP/Ecoregion/',Ecoregion,'/ppt_gpp_combined_1km.csv')
+write.csv(ppt_gpp,filename)
 
 }
-
-
-
 
